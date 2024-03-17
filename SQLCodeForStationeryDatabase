@@ -1,0 +1,298 @@
+create table departamentos(
+    cod_depto numeric(5) not null,
+    descricao varchar2(30),
+    constraint departamentos_cod_depto_pk primary key (cod_depto)
+)
+
+create table cart_trab(
+    cod_cart_trab numeric(5) not null,
+    numero_carteira numeric(5),
+    numero_de_serie numeric(5),
+    estado_emissao char(2),
+    data_emissao date,
+    constraint cart_trab_cod_cart_trab_pk primary key (cod_cart_trab)
+    )
+
+create table tipo_tell(
+    cod_tipo_tell numeric(5) not null,
+    descricao varchar2(60),
+    constraint tipo_tell_cod_tipo_tell_pk primary key (cod_tipo_tell)
+)
+
+create table tipo_dress(
+    cod_tipo_dress numeric(5) not null,
+    descricao varchar2(60),
+    constraint tipo_dress_cod_tipo_dress_pk primary key (cod_tipo_dress)
+)
+   
+create table tipo_pag(
+    cod_tipo_pag numeric(5) not null,
+    parcelamento varchar2(30),
+    constraint tipo_pag_cod_tipo_pag_pk primary key (cod_tipo_pag)
+)
+
+create table forma_pag(
+    cod_forma_pag numeric(5) not null,
+    descricao varchar2(30),
+    constraint forma_pag_cod_forma_pag_pk primary key (cod_forma_pag)
+)
+
+create table cliente(
+    cod_cliente numeric(5) not null,
+    data_cadastro date,
+    id_senha varchar2(30),
+    constraint cliente_cod_cliente_pk primary key (cod_cliente)
+)
+
+create table uf(
+    cod_uf numeric(5) not null,
+    nm_uf char(2),
+    constraint uf_cod_uf_pk primary key (cod_uf)
+)
+
+create table cores(
+    cod_cor numeric(5) not null,
+    nm_cor varchar2(10),
+    constraint cores_cod_cor_pk primary key (cod_cor)
+)
+
+create table categ_prod(
+    cod_categ_prod numeric(5),
+    nm_categ varchar2(10),
+    constraint categ_prod_cod_categ_prod_pk primary key (cod_categ_prod)
+)
+
+create table marca(
+    cod_marca numeric(5),
+    nm_marca varchar2(10),
+    constraint marca_cod_marca_pk primary key (cod_marca)
+)    
+
+create table telefone(
+    cod_tell numeric(5),
+    cod_tipo_tell numeric(5),
+    ddd varchar2(3),
+    prefixo numeric(5),
+    sufixo numeric(4),
+    constraint telefone_cod_tell_pk primary key (cod_tell),
+    constraint tipo_tell_cod_tipo_tell_fk foreign key (cod_tipo_tell) references tipo_tell(cod_tipo_tell)
+    )
+
+create table cidade(
+    cod_cid numeric(5),
+    cod_uf numeric(5),
+    nm_cid varchar(20),
+    constraint cidade_cod_cid_pk primary key (cod_cid),
+    constraint uf_cod_uf_fk foreign key (cod_uf) references uf(cod_uf)
+    )
+    
+create table bairro(
+    cod_bairro numeric(5),
+    cod_cid numeric(5),
+    nm_bairro varchar2(20),
+    constraint bairro_cod_bairro_pk primary key (cod_bairro),
+    constraint cidade_cod_cid_fk foreign key (cod_cid) references cidade(cod_cid)
+    )
+    
+create table endereco(
+    cod_dress numeric(5),
+    cod_bairro numeric(5),
+    cod_tipo_dress numeric(5),
+    cep numeric(9),
+    complemento varchar2(100),
+    logradouro varchar2(50),
+    numero numeric(4),
+    constraint endereco_cod_dress_pk primary key (cod_dress),
+    constraint bairro_cod_bairro_fk foreign key (cod_bairro) references bairro(cod_bairro),
+    constraint tipo_dress_cod_tipo_dress_fk foreign key (cod_tipo_dress) references tipo_dress(cod_tipo_dress)
+    )
+    
+create table cargos(
+    cod_cargo numeric(5),
+    cod_depto numeric(5),
+    nm_cargo varchar2(100),
+    constraint cargos_cod_cargo_pk primary key (cod_cargo),
+    constraint departamentos_cod_depto_fk foreign key (cod_depto) references departamentos(cod_depto)
+    )
+
+create table funcionarios(
+    cod_func numeric(5),
+    cod_cargo numeric(5),
+    cod_cart_trab numeric(5),
+    salario numeric(10,2),
+    rg numeric,
+    constraint funcionarios_cod_func_pk primary key (cod_func),
+    constraint cargos_cod_cargo_fk foreign key (cod_cargo) references cargos(cod_cargo),
+    constraint cart_trab_cod_cart_trab_fk foreign key (cod_cart_trab) references cart_trab(cod_cart_trab)
+    )
+    
+create table pessoa_fis(
+    cod_pessoa_fis numeric(5),
+    cod_func numeric(5),
+    cod_cliente numeric(5),
+    cpf numeric(11),
+    constraint pessoa_fis_cod_pessoa_fis_pk primary key (cod_pessoa_fis),
+    constraint funcionarios_cod_func_fk foreign key (cod_func) references funcionarios(cod_func),
+    constraint cliente_cod_cliente_fk foreign key (cod_cliente) references cliente(cod_cliente)
+    )
+
+create table pagamento(
+	cod_pag numeric(5),
+	cod_forma_pag numeric(5),
+	cod_tipo_pag numeric (5),
+	status_pag char(8) check (status_pag in ('Aprovado','Pendente')),
+	constraint pagamento_cod_pag_pk primary key (cod_pag),
+	constraint forma_pag_cod_forma_pag_fk foreign key (cod_forma_pag) references forma_pag(cod_forma_pag),
+	constraint tipo_pag_cod_tipo_pag_fk foreign key (cod_tipo_pag) references tipo_pag(cod_tipo_pag) 
+	)
+
+create table nota_fiscal( 
+	cod_nota_fiscal numeric(5), 
+	Icms numeric(9), 
+	data_emissao date, 
+	cod_pag numeric(5), 
+	constraint nota_fiscal_cod_nota_fiscal_pk primary key (cod_nota_fiscal), 
+	constraint pagamento_cod_pag_fk foreign key (cod_pag) references pagamento(cod_pag) 
+) 
+
+create table transportadora_fornecedor( 
+	cod_transporte numeric(5),
+	cod_nota_fiscal numeric(5), 
+	nm_fantasia varchar2(100), 
+	razao_social varchar2(100), 
+	constraint transportadora_fornecedor_cod_transporte_pk primary key (cod_transporte),  
+	constraint nota_fiscal_cod_nota_fiscal_fk foreign key (cod_nota_fiscal) references nota_fiscal(cod_nota_fiscal) 
+)
+
+create table pessoa_jus( 
+	cod_pessoa_jus numeric(5), 
+	cnpj numeric(18), 
+	cod_cliente numeric(5), 
+	cod_transporte numeric(5), 
+	constraint pessoa_jus_cod_pessoa_jus_pk primary key (cod_pessoa_jus), 
+	constraint cli_cod_cliente_fk foreign key (cod_cliente) references cliente(cod_cliente), 
+	constraint transportadora_fornecedor_cod_transporte_fk foreign key (cod_transporte) references transportadora_fornecedor(cod_transporte) 
+) 
+
+create table pessoa( 
+	cod_pessoa numeric(5), 
+	nm_pessoa varchar2(100), 
+	email varchar2(100) UNIQUE, 
+	data_nasc date, 
+	sexo char(1) check (sexo in ('M','F','O')), 
+	cod_dress numeric(5), 
+	cod_tell numeric(5), 
+	cod_pessoa_fis numeric(5), 
+	cod_pessoa_jus numeric(5), 
+	constraint pessoa_cod_pessoa_pk primary key (cod_pessoa), 
+	constraint endereco_cod_dress_fk foreign key (cod_dress) references endereco(cod_dress), 
+	constraint telefone_cod_tell_fk foreign key (cod_tell) references telefone(cod_tell), 
+	constraint pessoa_fis_cod_pessoa_fis_fk foreign key (cod_pessoa_fis) references pessoa_fis(cod_pessoa_fis), 
+	constraint pessoa_jus_cod_pessoa_jus_fk foreign key (cod_pessoa_jus) references pessoa_jus(cod_pessoa_jus) 
+) 
+
+create table pedido_de_compra( 
+	cod_pedido_de_compra numeric(5), 
+	qt numeric, 
+	data_pedido date, 
+	cod_pag numeric(5), 
+	constraint pedido_de_compra_cod_pedido_de_compra_pk primary key (cod_pedido_de_compra), 
+	constraint pag_cod_pag_fk foreign key (cod_pag) references pagamento(cod_pag) 
+) 
+
+create table produto( 
+	cod_produto numeric(5), 
+	preco numeric, 
+	cod_categ_prod numeric(5), 
+	cod_marca numeric(5), 
+	nome varchar2(50), 
+	cod_barras char(12),
+	constraint produto_cod_produto_pk primary key (cod_produto), 
+	constraint categ_prod_cod_categ_prod_fk foreign key (cod_categ_prod) references categ_prod(cod_categ_prod), 
+	constraint marca_cod_marca_fk foreign key (cod_marca) references marca(cod_marca) 
+) 
+
+create table estoque( 
+	cod_estoque numeric(5), 
+	qt_estoque numeric, 
+	cod_produto numeric(5), 
+	constraint estoque_cod_estoque_pk primary key (cod_estoque), 
+	constraint produto_cod_produto_fk foreign key (cod_produto) references produto(cod_produto) 
+) 
+
+
+create table produto_pedido_de_compra( 
+	cod_produto numeric(5), 
+	cod_pedido_de_compra numeric(5), 
+	constraint composta_prod_pedido primary key (cod_produto,cod_pedido_de_compra)  
+
+)  
+
+create table cores_produto( 
+	cod_cor numeric(5), 
+	cod_produto numeric(5), 
+	constraint composta_cores_produto_pk primary key (cod_cor,cod_produto) 
+) 
+
+create table itens_pedido( 
+	cod_itens_pedido numeric(5), 
+	qt_itens numeric, 
+	cod_produto numeric(5), 
+	constraint itens_pedido_cod_itens_pedido_pk primary key (cod_itens_pedido), 
+	constraint prod_cod_produto_fk foreign key (cod_produto) references produto(cod_produto) 
+)
+ 
+create table pedido( 
+	cod_pedido numeric(5), 
+	cod_pessoa numeric(5), 
+	cod_itens_pedido numeric(5), 
+	cod_pag numeric(5), 
+	data_pedido date, 
+	status_entrega char(10) check(status_entrega in ('Retirada','Transporte')), 
+	constraint pedido_cod_pedido_pk primary key (cod_pedido), 
+	constraint pessoa_cod_pessoa_fk foreign key (cod_pessoa) references pessoa(cod_pessoa), 
+	constraint itens_pedido_cod_itens_pedido_fk foreign key (cod_itens_pedido) references itens_pedido(cod_itens_pedido), 
+	constraint pgmt_cod_pag_fk foreign key (cod_pag) references pagamento(cod_pag) 
+)
+
+
+Create table itens_pedido_pedido( 
+
+	cod_pedido numeric(5), 
+
+	cod_itens_pedido numeric(5), 
+
+	constraint composta_pedido_itenspedido_pk primary key (cod_pedido,cod_itens_pedido)
+) 
+
+create sequence sqdepartamentos increment by 1 start with 1 cache 5;  
+
+Insert into departamentos(cod_depto, descricao) values (sqdepartamentos.nextval,'Gerência');  
+
+ Insert into departamentos(cod_depto, descricao) values (sqdepartamentos.nextval,'RH');  
+
+Insert into departamentos(cod_depto, descricao) values (sqdepartamentos.nextval,'Financeiro') ;  
+
+Insert into departamentos(cod_depto, descricao) values (sqdepartamentos.nextval,'Logistica');  
+
+Insert into departamentos(cod_depto, descricao) values (sqdepartamentos.nextval,'Marketing'); 
+
+// Select's
+
+select nm_pessoa "Nome", email "Email", to_char(data_nasc, 'YYYY-MM-DD') "Data de Nascimento",sexo "Sexo",
+logradouro "Complemento", complemento "Endereço", numero "Numero do Endereço", cep "CEP", ddd "DDD", prefixo "Prefixo", sufixo "Sufixo"
+from pessoa, endereco, telefone where pessoa.cod_dress=endereco.cod_dress and pessoa.cod_tell=telefone.cod_tell
+order by nm_pessoa asc;
+
+create view V_Pessoas 
+as  
+Select p.nm_pessoa, t.ddd, t.prefixo, t.sufixo, p.email from pessoa p, telefone t where t.cod_tell=p.cod_tell;
+
+create view V_Enviados
+as  
+Select pe.status_entrega, pa.status_pag, n.data_emissao, tr.razao_social from pedido pe, pagamento pa, nota_fiscal n, transportadora_fornecedor tr 
+where pe.cod_pag=pa.cod_pag  and tr.cod_nota_fiscal=n.cod_nota_fiscal;
+
+select p.cod_produto "Código do Produto", p.preco "Preço do Produto",p.nome "Nome do Produto", p.cod_barras
+"Código de Barras", c.nm_categ "Nome Categoria Produto", f.nm_cor "Cores dos Produtos" from produtos p, 
+categ_prod c, cores f where c.cod_categ_prod=p.cod_categ_prod and f.cod_cores=p.cod_cores;
