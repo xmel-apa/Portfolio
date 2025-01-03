@@ -19,7 +19,7 @@ public class ConexaoDB {
     // Nome de usuário do banco de dados
     private static final String USER = "postgres";
     // Senha do banco de dados
-    private static final String PASSWORD = "superfranky123";
+    private static final String PASSWORD = "";
 
      public static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(URL, USER, PASSWORD);
