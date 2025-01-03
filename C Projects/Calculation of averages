@@ -1,0 +1,28 @@
+#include <stdio.h>
+#include <string.h>
+
+int main()
+{
+    int n1,n2,n3,media_nota;
+   
+    printf("Informe sua nota A1: ");
+    scanf("%d",&n1);
+    if(n1<=2) {}
+    else
+    {printf("\nSua note é invalida!");
+    }
+    printf("\nInforme sua nota A2: ");
+    scanf("%d",&n2);
+    if(n2<=3) {}
+    else {printf("\nSua nota é invalida!");
+    }
+    printf("\nInforme sua nota A3: ");
+    scanf("%d",&n3);
+    if(n3<=5){}
+    else {printf("\nSua nota é invalida!");
+    }
+    media_nota=(n1+n2+n3)/2+3+5;
+   
+    printf("\nSua média é: %d");
+     return 0;
+}
