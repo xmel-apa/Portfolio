@@ -1,0 +1,11 @@
+.selecao-conservacao {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    width: 900px;
+    height: 600px;
+}
+
+#continuar-conservacao {
+    margin-top: 15px;
+}
