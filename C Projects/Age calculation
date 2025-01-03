@@ -1,0 +1,20 @@
+#include <stdio.h>
+
+int main()
+{
+    int idade_1, idade_2, media_idade;
+    char nome_1, nome_2;
+   
+    printf("Digite seu nome: ");
+    scanf("%s", &nome_1);
+    printf("\nDigite o nome de seu/sua companheira/o: ");
+    scanf("%s",&nome_2);
+    printf("\nDigite sua idade: ");
+    scanf("%d",&idade_1);
+    printf("\nDigite a idade de seu/sua companheira/o; ");
+    scanf("%d",&idade_2);
+   
+    media_idade=(idade_1+idade_2)/2;
+   
+    printf("\n %s tem %d de idade e %s tem %d de idade. A média da idade do casal é de: %d",nome_1,nome_2,idade_1,idade_2,media_idade);
+}
