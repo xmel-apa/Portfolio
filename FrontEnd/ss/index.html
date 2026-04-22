@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>UniCode - Desenvolvedores Web</title>
+
+  <!-- favicon -->
+  <link rel="icon" type="image/svg+xml" href="image/Logo.svg" />
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo-box">
+        <svg class="logo-svg" viewBox="0 0 380 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="10" y="10" width="90" height="90" rx="8" stroke="black" fill="none" stroke-width="3"/>
+          <g transform="translate(55 55)">
+            <circle cx="0" cy="0" r="8" fill="black"/>
+            <ellipse cx="0" cy="0" rx="35" ry="15" stroke="black" fill="none" stroke-width="3" transform="rotate(20)"/>
+            <ellipse cx="0" cy="0" rx="35" ry="15" stroke="black" fill="none" stroke-width="3" transform="rotate(90)"/>
+            <ellipse cx="0" cy="0" rx="35" ry="15" stroke="black" fill="none" stroke-width="3" transform="rotate(160)"/>
+          </g>
+        </svg>
+
+        <!-- Ajuste solicitado: aproximar o texto da logo -->
+      <span class="logo-text">UniCode</span> 
+      </div>
+
+      <nav class="nav">
+        <a href="#home" class="nav-link">Home</a>
+        <a href="#servicos" class="nav-link">Serviços</a>
+        <a href="#contato" class="nav-link cta">Contato</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- HERO -->
+<main>
+  <section id="home" class="hero" style="position: relative; overflow: hidden;">
+
+    <!-- Canvas do globo de neve -->
+    <canvas id="hero-canvas"
+      style="
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+      ">
+    </canvas>
+
+    <div class="hero-layer layer-back" data-parallax="0.2"></div>
+
+    <div class="hero-content" style="position: relative; z-index: 2;">
+      <h1 class="reveal-up">
+        Design & Desenvolvimento<br>
+        <span>para marcas que querem mais</span>
+      </h1>
+
+      <p class="reveal-up delay-200">
+        Sites responsivos, experiências digitais e soluções sob medida para empresas.
+      </p>
+
+      <div class="hero-ctas reveal-up delay-400">
+        <a href="#servicos" class="btn btn-primary">Ver Serviços</a>
+        <a href="#contato" class="btn btn-ghost">Solicitar Orçamento</a>
+      </div>
+    </div>
+
+    <div class="hero-layer layer-front" data-parallax="0.5"></div>
+  </section>
+
+    <!-- SOBRE -->
+    <section class="sobre reveal-left" id="sobre">
+      <div class="wrap">
+        <div class="sobre-container">
+          <div class="sobre-texto">
+            <h2>Quem somos</h2>
+            <p>
+              A UniCode é formada por um grupo de desenvolvedores criativos: unimos estratégia, design e tecnologia para construir
+              experiências digitais memoráveis. Trabalhamos com empresas de todos os portes e com orçamentos exclusivos de acordo com a necessidade de cada cliente.
+            </p>
+          </div>
+          <div class="sobre-imagem">
+            <img src="image/HomepagePet.png" alt="Hospedagem e desenvolvimento web">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SERVIÇOS -->
+    <section id="servicos" class="servicos">
+      <div class="wrap">
+        <h2 class="reveal-up">Nossos serviços</h2>
+    
+        <div class="cards">
+    
+          <!-- CARD 1 -->
+          <div class="card reveal-up delay-100">
+            <div class="card-inner">
+              <h3>Landing Pages</h3>
+              <p>Páginas otimizadas para campanhas e geração de leads.</p>
+            </div>
+    
+            <div class="card-info">
+              <p>LPs rápidas, bonitas e otimizadas para campanhas de tráfego pago e captação.</p>
+            </div>
+          </div>
+    
+          <!-- CARD 2 -->
+          <div class="card reveal-up delay-200">
+            <div class="card-inner">
+              <h3>Sites Institucionais</h3>
+              <p>Identidade online profissional com foco em imagem e conversão.</p>
+            </div>
+    
+            <div class="card-info">
+              <p>Desenvolvemos sites modernos com alta performance, SEO e identidade visual forte.</p>
+            </div>
+          </div>
+    
+          <!-- CARD 3 -->
+          <div class="card reveal-up delay-300">
+            <div class="card-inner">
+              <h3>E-commerce</h3>
+              <p>Lojas rápidas, seguras e fáceis de gerenciar.</p>
+            </div>
+    
+            <div class="card-info">
+              <p>Lojas virtuais personalizadas, com checkout rápido e integração com sistemas.</p>
+            </div>
+          </div>
+    
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTATO -->
+<section id="contato" class="contato">
+  <div class="wrap">
+    <h2 class="reveal-up">Fale com a UniCode</h2>
+
+    <form class="form reveal-up delay-200" onsubmit="handleSubmit(event)">
+      <div class="row">
+        <label>
+          Nome
+          <input type="text" name="nome" required placeholder="Digite Seu Nome Aqui">
+        </label>
+
+        <label>
+          Email
+          <input type="email" name="email" required placeholder="Digite Seu Email Aqui">
+        </label>
+        
+        <!-- Novo campo: Telefone -->
+        <label>
+          Telefone
+          <input type="tel" name="telefone" required placeholder="(11) 99999-9999">
+        </label>
+      </div>
+
+      <label>
+        Descrição do projeto
+        <textarea name="projeto" rows="5" required placeholder="Exemplo: Preciso de um site institucional para minha empresa com aproximadamente 5 páginas (Home, Sobre, Serviços, Portfólio e Contato). Gostaria de um design moderno e responsivo, com integração para formulário de contato e blog. Prazo estimado de 30 dias."></textarea>
+      </label>
+
+      <div class="form-actions">
+        <button class="btn btn-primary">Enviar Mensagem</button>
+        <div id="form-status" class="status"></div>
+      </div>
+    </form>
+  </div>
+</section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <p>© 2025 UniCode — Desenvolvedores Web</p>
+    </div>
+  </footer>
+
+  <script>
+
+    /* Reveal */
+    (function(){
+      const reveals = document.querySelectorAll('.reveal-up, .reveal-left, .reveal-right');
+      const io = new IntersectionObserver(entries=>{
+        entries.forEach(e=>{
+          if(e.isIntersecting){e.target.classList.add('is-visible'); io.unobserve(e.target);}
+        });
+      },{threshold:.12});
+      reveals.forEach(r=>io.observe(r));
+    })();
+
+    /* Parallax */
+    (function(){
+      const layers = document.querySelectorAll('[data-parallax]');
+      function scroll(){
+        const t = window.scrollY;
+        layers.forEach(layer=>{
+          const f = parseFloat(layer.dataset.parallax);
+          layer.style.transform = `translateY(${t*f}px)`;
+        });
+      }
+      scroll();
+      window.addEventListener('scroll', scroll);
+    })();
+
+    /* Form */
+function handleSubmit(e){
+  e.preventDefault();
+  const s = document.getElementById("form-status");
+  s.textContent = "Enviando...";
+  
+  // Coletar dados do formulário (para possível uso futuro)
+  const formData = {
+    nome: e.target.querySelector('input[name="nome"]').value,
+    email: e.target.querySelector('input[name="email"]').value,
+    telefone: e.target.querySelector('input[name="telefone"]').value,
+    projeto: e.target.querySelector('textarea[name="projeto"]').value
+  };
+  
+  console.log('Dados do formulário:', formData); // Para depuração
+  
+  setTimeout(()=>{
+    s.textContent = "Mensagem enviada! Entraremos em contato em breve.";
+    s.style.color = "#2a7a2a";
+    e.target.reset();
+  },900);
+}
+
+
+  </script>
+<script>
+  (() => {
+    const canvas = document.getElementById("hero-canvas");
+    const ctx = canvas.getContext("2d");
+    const hero = document.querySelector(".hero");
+  
+    function resize() {
+      canvas.width = hero.offsetWidth;
+      canvas.height = hero.offsetHeight;
+    }
+    resize();
+    window.addEventListener("resize", resize);
+  
+    const mouse = { x: null, y: null, radius: 180 };
+  
+    hero.addEventListener("mousemove", (e) => {
+      const rect = hero.getBoundingClientRect();
+      mouse.x = e.clientX - rect.left;
+      mouse.y = e.clientY - rect.top;
+    });
+  
+    hero.addEventListener("mouseleave", () => {
+      mouse.x = null;
+      mouse.y = null;
+    });
+  
+    class Bola {
+      constructor(radius) {
+        this.radius = radius;
+        this.x = Math.random() * (canvas.width - radius * 2) + radius;
+        this.y = Math.random() * (canvas.height - radius * 2) + radius;
+        this.vx = (Math.random() - 0.5) * 1.2;
+        this.vy = (Math.random() - 0.5) * 1.2;
+      }
+  
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+  
+        if (this.x + this.radius > canvas.width || this.x - this.radius < 0) {
+          this.vx *= -1;
+        }
+        if (this.y + this.radius > canvas.height || this.y - this.radius < 0) {
+          this.vy *= -1;
+        }
+  
+        if (mouse.x !== null) {
+          const dx = this.x - mouse.x;
+          const dy = this.y - mouse.y;
+          const dist = Math.hypot(dx, dy);
+  
+          if (dist < mouse.radius) {
+            const force = (mouse.radius - dist) / mouse.radius;
+            this.vx += (dx / dist) * force * 0.4;
+            this.vy += (dy / dist) * force * 0.4;
+          }
+        }
+  
+        this.vx *= 0.995;
+        this.vy *= 0.995;
+      }
+  
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.strokeStyle = "rgba(235,235,235,0.07)";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+    }
+  
+    const bolas = [];
+  
+    for (let i = 0; i < 40; i++) {
+      bolas.push(new Bola(14 + Math.random() * 26));
+    }
+  
+    for (let i = 0; i < 25; i++) {
+      bolas.push(new Bola(36 + Math.random() * 30));
+    }
+  
+    function colisao() {
+      for (let i = 0; i < bolas.length; i++) {
+        for (let j = i + 1; j < bolas.length; j++) {
+          const a = bolas[i];
+          const b = bolas[j];
+          const dx = b.x - a.x;
+          const dy = b.y - a.y;
+          const dist = Math.hypot(dx, dy);
+          const min = a.radius + b.radius;
+  
+          if (dist < min) {
+            const angle = Math.atan2(dy, dx);
+            const overlap = min - dist;
+            const ox = Math.cos(angle) * overlap * 0.5;
+            const oy = Math.sin(angle) * overlap * 0.5;
+  
+            a.x -= ox;
+            a.y -= oy;
+            b.x += ox;
+            b.y += oy;
+  
+            [a.vx, b.vx] = [b.vx, a.vx];
+            [a.vy, b.vy] = [b.vy, a.vy];
+          }
+        }
+      }
+    }
+  
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+      bolas.forEach(b => {
+        b.update();
+        b.draw();
+      });
+  
+      colisao();
+      requestAnimationFrame(animate);
+    }
+  
+    animate();
+  })();
+  </script>
+</body>
+</html>
