@@ -1,0 +1,28 @@
+<svg width="300" height="100" viewBox="0 0 300 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+  <defs>
+    <style>
+      .logo-text { 
+        font-family: Arial, sans-serif; 
+        font-weight: 700; 
+        font-size: 40px; 
+        fill: #000000; /* Preto para o texto */
+      }
+      .logo-symbol {
+        fill: none;
+        stroke: #000000; /* Preto para o símbolo */
+        stroke-width: 4;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+    </style>
+  </defs>
+
+  <g transform="translate(20, 50)">
+    <path class="logo-symbol" d="M0 0 L15 -20 L15 20 Z"/>
+    <path class="logo-symbol" d="M40 0 L25 -20 L25 20 Z"/>
+  </g>
+
+  <text x="75" y="65" class="logo-text">UniCode</text>
+
+</svg>
