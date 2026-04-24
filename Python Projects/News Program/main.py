@@ -1,72 +1,72 @@
-#-----------------------------------------------------------------------------------------------------------#
-# Este programa executa o processo de pesquisar notícias, utilizando a API do NewsAPI.
-# Apresenta uma interface gráfica para o usuário, onde ele pode escolher a categoria de notícias que deseja.
-#-----------------------------------------------------------------------------------------------------------#
 import tkinter as tk
 from tkinter import messagebox
 import webbrowser
 import requests
-import os
 from typing import List, Dict
 
-# ======================== CONFIGURAÇÃO DA API ========================
-NEWSAPI_KEY = "9cfb289f91834653a0ebd34917415c25"   # Sua chave real
+NEWSAPI_KEY = "9cfb289f91834653a0ebd34917415c25"
 NEWSAPI_URL = "https://newsapi.org/v2/everything"
 
-#========================================= Definição das categorias ==========================================#
-MP1 = [
-    "PVC", "PE", "policloreto de vinila", "polietileno",
-    "PEBD", "PEAD", "resina PVC", "preço PVC", "mercado de PVC"
-]
-
-MP2 = [
-    "óleo de soja", "soybean oil", "farelo de soja",
-    "soja", "CBOT soja", "Chicago soja", "prêmio soja"
-]
-
-GLOBAL = [
-    "mercado global", "global market", "economia mundial",
-    "world economy", "crise global", "commodities globais",
-    "índices globais", "bolsas mundiais", "bolsas de valores",
-    "stock exchange", "commodities", "guerra comercial",
-    "trade war", "petróleo", "oil", "dólar", "dollar",
-    "antidumping", "tarifas internacionais", "tarifas globais"
-]
-
 CATEGORIAS = {
-    "MP - PVC/PE": MP1,
-    "MP - Óleo de soja": MP2,
-    "Global - Mercado global": GLOBAL
+    "MP - PVC/PE": {
+        "base": "PVC OR PE OR polietileno OR resina plástica",
+        "mercado": ["preço", "mercado", "cotação", "demanda", "petroquímica"],
+        "domains": "globo.com, reuters.com, valor.com.br, exame.com, infomoney.com.br"
+    },
+    "MP - Óleo de soja": {
+        "base": "soja OR soybean oil OR farelo soja",
+        "mercado": ["preço", "cotação", "mercado", "Chicago", "CBOT"],
+        "domains": "globo.com, reuters.com, valor.com.br, exame.com, bloomberg.com"
+    },
+    "Global - Mercado global": {
+        "base": "mercado global OR economia mundial OR commodities OR inflação OR juros",
+        "mercado": ["preço", "bolsa", "índice", "dólar", "taxa"],
+        "domains": "globo.com, reuters.com, bloomberg.com, valor.com.br, exame.com"
+    }
 }
 
-#======================================== Função de obtenção de notícias (real) ================================#
-def obter_noticias(palavras_chave: List[str]) -> List[Dict[str, str]]:
-    if NEWSAPI_KEY == "SUA_CHAVE_AQUI":
-        raise ValueError("Defina sua chave de API do NewsAPI.")
-    
-    query = " OR ".join(palavras_chave)
+def obter_noticias(categoria_nome: str) -> List[Dict[str, str]]:
+    info = CATEGORIAS[categoria_nome]
+    termos_base = info["base"]
+    termos_mercado = " OR ".join(info["mercado"])
+    query = f"({termos_base}) ({termos_mercado})"
+
+    # Primeiro tenta com domínios
     parametros = {
         "q": query,
         "apiKey": NEWSAPI_KEY,
         "language": "pt",
         "sortBy": "publishedAt",
-        "pageSize": 20
+        "pageSize": 20,
+        "domains": info["domains"]
     }
-    headers = {"User-Agent": "NewsFilterApp/1.0 (seuemail@exemplo.com)"}
+    headers = {"User-Agent": "NewsFilterApp/1.0"}
 
     try:
-        resposta = requests.get(NEWSAPI_URL, params=parametros, headers=headers, timeout=10)
-        resposta.raise_for_status()
-        dados = resposta.json()
+        resp = requests.get(NEWSAPI_URL, params=parametros, headers=headers, timeout=10)
+        resp.raise_for_status()
+        dados = resp.json()
 
-        if dados["status"] != "ok":
-            print("Erro na API:", dados.get("message", "Erro desconhecido"))
-            return []
+        if dados["status"] == "ok" and dados.get("articles"):
+            artigos = dados["articles"]
+        else:
+            # Fallback: sem restrição de domínios
+            fallback_params = {
+                "q": query,
+                "apiKey": NEWSAPI_KEY,
+                "language": "pt",
+                "sortBy": "publishedAt",
+                "pageSize": 20
+            }
+            resp2 = requests.get(NEWSAPI_URL, params=fallback_params, headers=headers, timeout=10)
+            resp2.raise_for_status()
+            dados2 = resp2.json()
+            artigos = dados2.get("articles", [])
 
-        artigos = dados.get("articles", [])
         resultado = []
         for artigo in artigos:
-            titulo, link = artigo.get("title"), artigo.get("url")
+            titulo = artigo.get("title")
+            link = artigo.get("url")
             if titulo and link:
                 resultado.append({"titulo": titulo, "link": link})
         return resultado
@@ -75,15 +75,13 @@ def obter_noticias(palavras_chave: List[str]) -> List[Dict[str, str]]:
         print(f"Erro na requisição: {e}")
         return []
 
-# ===================== INTERFACE GRÁFICA PRINCIPAL =====================
+# --- Interface (mesmo código dark, sem sublinhado) ---
 class Aplicacao:
-    # Paleta de cores escuras
     DARK_BG = "#1e1e1e"
     DARKER_BG = "#252525"
     TEXT_COLOR = "#dcdcdc"
-    LINK_COLOR = "#4da6ff"        # azul claro
-    VISITED_COLOR = "#666666"     # cinza escuro
-    BUTTON_BG = "#3c3c3c"
+    LINK_COLOR = "#4da6ff"
+    VISITED_COLOR = "#666666"
     GREEN_BUTTON_BG = "#2e7d32"
     RADIO_BG = "#2d2d2d"
     TEXT_AREA_BG = "#2d2d2d"
@@ -95,126 +93,76 @@ class Aplicacao:
         self.root.resizable(True, True)
         self.root.configure(bg=self.DARK_BG)
 
-        # ----- Frame de seleção (topo) -----
         frame_selecao = tk.Frame(root, bg=self.DARK_BG, pady=10)
         frame_selecao.pack(fill="x")
 
-        titulo = tk.Label(
-            frame_selecao,
-            text="Selecione a categoria:",
-            font=("Arial", 12, "bold"),
-            bg=self.DARK_BG,
-            fg=self.TEXT_COLOR
-        )
-        titulo.pack()
+        tk.Label(frame_selecao, text="Selecione a categoria:", font=("Arial", 12, "bold"),
+                 bg=self.DARK_BG, fg=self.TEXT_COLOR).pack()
 
         self.categoria_selecionada = tk.StringVar(value="MP - PVC/PE")
-
         frame_radios = tk.Frame(frame_selecao, bg=self.DARK_BG)
         frame_radios.pack(pady=5)
 
         for i, nome in enumerate(CATEGORIAS.keys()):
-            rb = tk.Radiobutton(
-                frame_radios,
-                text=nome,
-                variable=self.categoria_selecionada,
-                value=nome,
-                font=("Arial", 10),
-                bg=self.RADIO_BG,
-                fg=self.TEXT_COLOR,
-                activebackground=self.DARKER_BG,
-                activeforeground=self.TEXT_COLOR,
-                selectcolor=self.DARK_BG,
-                relief="flat"
-            )
-            rb.grid(row=0, column=i, padx=10)
+            tk.Radiobutton(
+                frame_radios, text=nome, variable=self.categoria_selecionada, value=nome,
+                font=("Arial", 10), bg=self.RADIO_BG, fg=self.TEXT_COLOR,
+                activebackground=self.DARKER_BG, activeforeground=self.TEXT_COLOR,
+                selectcolor=self.DARK_BG, relief="flat"
+            ).grid(row=0, column=i, padx=10)
 
         tk.Button(
-            frame_selecao,
-            text="🔍 Buscar Notícias",
-            font=("Arial", 11, "bold"),
-            bg=self.GREEN_BUTTON_BG,
-            fg="white",
-            activebackground="#1b5e20",
-            activeforeground="white",
-            relief="flat",
-            bd=0,
-            padx=10,
-            pady=3,
+            frame_selecao, text="🔍 Buscar Notícias", font=("Arial", 11, "bold"),
+            bg=self.GREEN_BUTTON_BG, fg="white", activebackground="#1b5e20",
+            activeforeground="white", relief="flat", bd=0, padx=10, pady=3,
             command=self.buscar_noticias
         ).pack(pady=15)
 
-        # ----- Separador -----
-        separador = tk.Frame(root, height=2, bg="#555555")
-        separador.pack(fill="x", padx=10)
+        tk.Frame(root, height=2, bg="#555555").pack(fill="x", padx=10)
 
-        # ----- Frame de resultados -----
         frame_resultados = tk.Frame(root, bg=self.DARK_BG)
         frame_resultados.pack(fill="both", expand=True, padx=10, pady=10)
 
-        tk.Label(
-            frame_resultados,
-            text="Resultados:",
-            font=("Arial", 11, "bold"),
-            bg=self.DARK_BG,
-            fg=self.TEXT_COLOR
-        ).pack(anchor="w")
+        tk.Label(frame_resultados, text="Resultados:", font=("Arial", 11, "bold"),
+                 bg=self.DARK_BG, fg=self.TEXT_COLOR).pack(anchor="w")
 
         self.texto_resultado = tk.Text(
-            frame_resultados,
-            wrap="word",
-            cursor="hand2",
-            font=("Arial", 11),
-            relief="flat",
-            borderwidth=0,
-            padx=8,
-            pady=8,
-            state="disabled",
-            bg=self.TEXT_AREA_BG,
-            fg=self.TEXT_COLOR,
-            insertbackground="white",   # cursor
+            frame_resultados, wrap="word", cursor="hand2", font=("Arial", 11),
+            relief="flat", borderwidth=0, padx=8, pady=8, state="disabled",
+            bg=self.TEXT_AREA_BG, fg=self.TEXT_COLOR, insertbackground="white",
             highlightthickness=0
         )
         scrollbar = tk.Scrollbar(frame_resultados, command=self.texto_resultado.yview)
         self.texto_resultado.configure(yscrollcommand=scrollbar.set)
-
         scrollbar.pack(side="right", fill="y")
         self.texto_resultado.pack(side="left", fill="both", expand=True)
 
-        # Tags para links e visitados
         self.texto_resultado.tag_configure("link", foreground=self.LINK_COLOR, underline=False)
         self.texto_resultado.tag_configure("visited", foreground=self.VISITED_COLOR, underline=False)
-        # A tag "visited" terá prioridade sobre "link" quando ambas existirem
         self.texto_resultado.tag_raise("visited", "link")
 
     def abrir_link(self, url, inicio, fim):
-        """Abre o link no navegador e marca a linha como visitada."""
         webbrowser.open(url)
         self.texto_resultado.configure(state="normal")
         self.texto_resultado.tag_add("visited", inicio, fim)
         self.texto_resultado.configure(state="disabled")
 
     def buscar_noticias(self):
-        """Realiza a filtragem e exibe os resultados no campo de texto."""
         categoria = self.categoria_selecionada.get()
-        palavras = CATEGORIAS[categoria]
-
-        # Feedback de busca
         self.texto_resultado.configure(state="normal")
         self.texto_resultado.delete("1.0", "end")
         self.texto_resultado.insert("end", "Buscando notícias...\n")
         self.texto_resultado.configure(state="disabled")
         self.root.update()
 
-        noticias = obter_noticias(palavras)
+        noticias = obter_noticias(categoria)
 
-        # Exibe os resultados
         self.texto_resultado.configure(state="normal")
         self.texto_resultado.delete("1.0", "end")
-
         self.texto_resultado.insert("end", f"Categoria: {categoria}\n\n")
+
         if not noticias:
-            self.texto_resultado.insert("end", "Nenhuma notícia encontrada ou erro na API.")
+            self.texto_resultado.insert("end", "Nenhuma notícia encontrada.")
         else:
             for i, n in enumerate(noticias, 1):
                 linha = f"{i}. {n['titulo']}\n"
@@ -222,16 +170,13 @@ class Aplicacao:
                 self.texto_resultado.insert("end", linha)
                 fim = self.texto_resultado.index("end-1c")
                 self.texto_resultado.tag_add("link", inicio, fim)
-                # Vincula o clique à função abrir_link com os parâmetros necessários
                 self.texto_resultado.tag_bind(
-                    "link",
-                    "<Button-1>",
+                    "link", "<Button-1>",
                     lambda e, url=n['link'], ini=inicio, fi=fim: self.abrir_link(url, ini, fi)
                 )
 
         self.texto_resultado.configure(state="disabled")
         print(f"{len(noticias)} notícia(s) encontrada(s) para '{categoria}'.")
-
 
 if __name__ == "__main__":
     root = tk.Tk()
