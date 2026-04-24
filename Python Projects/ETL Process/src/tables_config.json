@@ -1,0 +1,62 @@
+[
+  {
+    "nome": "data",
+    "arquivo": "C:/Users/palmeida/Dacarto/Departamento Operacional - Logística/_PCP/Plano de Produção VS Carteira/Template - análise de produção.xlsm",
+    "aba": "Evolução Entradas Pedidos",
+    "colunas": ["Data"],
+    "mapeamento": { "Data": "data" },
+    "chave": [],
+    "pk_column": "cod_date",
+    "pk_expression": "nextval('sqdt')",
+    "tabela_bd": "data",
+    "checkpoint": null,
+    "usar_ultimo_id_data": true,
+    "apenas_ultimo": true,
+    "coluna_ordenacao": "data"
+  },
+  {
+    "nome": "Producao",
+    "arquivo": "C:/Users/palmeida/Dacarto/Departamento Operacional - Logística/_PCP/Plano de Produção VS Carteira/Template - análise de produção.xlsm",
+    "aba": "Produção x Plano",
+    "colunas": ["Turno A", "Turno B", "Turno C", "Plano PCP", "Potencial"],
+    "mapeamento": {
+        "Turno A": "turnoa",
+        "Turno B": "turnob",
+        "Turno C": "turnoc",
+        "Plano PCP": "plano_pcp",
+        "Potencial": "potencial"
+    },
+    "chave": [],
+    "pk_column": "cod_prod",
+    "pk_expression": "nextval('sqprod')",
+    "tabela_bd": "Producao",
+    "checkpoint": null,
+    "fk": { "cod_datefk": "data" },        
+    "usar_ultimo_id_data": false,
+    "apenas_ultimo": false,
+    "coluna_ordenacao": null
+},
+{
+  "nome": "Carteira",
+  "arquivo": "C:/Users/palmeida/Dacarto/Departamento Operacional - Logística/_PCP/Plano de Produção VS Carteira/cache/Carteira.xlsm",
+  "aba": "PVC",
+  "colunas": ["Carteira", "Faturamento", "Estoque", "Produzir"],
+  "mapeamento": {
+      "Carteira": "cartvalor",
+      "Faturamento": "fatvalor",
+      "Estoque": "estoquevalor",
+      "Produzir": "produzir"
+  },
+  "chave": [],
+  "pk_column": "cod_cart",
+  "pk_expression": "nextval('sqcart')",
+  "fixed_columns": {"cod_tipom": 1 },
+  "tabela_bd": "Carteira",
+  "checkpoint": null,
+  "fk": { "cod_date": "data" },        
+  "usar_ultimo_id_data": false,
+  "apenas_ultimo": false,
+  "coluna_ordenacao": null
+}
+      
+]
