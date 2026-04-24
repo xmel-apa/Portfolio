@@ -1,0 +1,103 @@
+[
+
+    {
+       "nome": "Data",
+       "arquivo": "C:/Users/palmeida/Dacarto/Departamento Operacional - Logística/_PCP/Plano de Produção VS Carteira/Template - análise de produção.xlsx",
+       "aba": "Evolução Entrada Pedidos",
+       "colunas": ["Data"],
+       "mapeamento": {
+           "Data": "Data"
+       },
+       "tabela_bd": "Data",
+       "checkpoint": "C:/Users/palmeida/OneDrive - Dacarto/Área de Trabalho/Auto BI/Json/Datas.json"
+   },
+
+   {
+       "nome": "Orcamento",
+       "arquivo": "C:/Users/palmeida/Dacarto/Departamento Operacional - Logística/_PCP/Plano de Produção VS Carteira/Template - análise de produção.xlsx",
+       "aba": "Evolução Entrada Pedidos",
+       "colunas": ["Data", "BTG", "FCST"],
+       "mapeamento": {
+           "Data": "Cod_date",
+           "BTG": "Buget",
+           "FCST": "Forecast"
+       },
+       "tabela_bd": "Orcamento",
+       "checkpoint": "C:/Users/palmeida/OneDrive - Dacarto/Área de Trabalho/Auto BI/Json/orcamento.json",
+       "usar_ultimo_id_data": true,
+       "nome_coluna_fk": "Cod_date"
+   },
+
+   {
+       "nome": "Producao",
+       "arquivo": "C:/Users/palmeida/Dacarto/Departamento Operacional - Logística/_PCP/Plano de Produção VS Carteira/Template - análise de produção.xlsx",
+       "aba": "Produção x Plano",
+       "colunas": ["Data"],
+       "mapeamento": {
+           "ID": "Cod_prod", 
+           "Data": "Data",
+           "TurnoA": "TurnoA",
+           "TurnoB": "TurnoB",
+           "TurnoC": "TurnoC",
+           "Plano PCP": "Plano_PCP"
+       },
+       "chave": ["Cod_prod"],
+       "tabela_bd": "Producao",
+       "checkpoint": "C:/Users/palmeida/OneDrive - Dacarto/Área de Trabalho/Auto BI/Json/Producao.json"
+   },
+
+   {
+       "nome": "Expedição",
+       "arquivo": "C:/Users/palmeida/Dacarto/Departamento Operacional - Logística/_PCP/Plano de Produção VS Carteira/Template - análise de produção.xlsx",
+       "aba": "Expedição",
+       "colunas": ["Data"],
+       "mapeamento": {
+           "ID": "Cod_prod", 
+           "Data": "Data",
+           "TurnoA": "TurnoA",
+           "TurnoB": "TurnoB",
+           "TurnoC": "TurnoC",
+           "Plano PCP": "Plano_PCP"
+       },
+       "chave": ["Cod_prod"],
+       "tabela_bd": "Producao",
+       "checkpoint": "C:/Users/palmeida/OneDrive - Dacarto/Área de Trabalho/Auto BI/Json/Producao.json"
+   },
+   {
+    "nome": "teste",
+    "arquivo": "C:/Users/palmeida/OneDrive - Dacarto/Área de Trabalho/Tested.xlsx",
+    "aba": "Planilha1",
+    "colunas": ["Texto"],
+    "mapeamento": { "Texto": "descricao" },
+    "chave": [],
+    "pk_column": "id_teste",
+    "pk_expression": "nextval('testes')",
+    "tabela_bd": "teste",
+    "checkpoint": null,
+    "usar_ultimo_id_data": false,
+    "fk": { "cod_date": "Data" },
+    "apenas_ultimo": true,
+    "coluna_ordenacao": "descricao"
+  },
+  {
+    "nome": "Orcamento",
+    "arquivo": "C:/Users/palmeida/Dacarto/Departamento Operacional - Logística/_PCP/Plano de Produção VS Carteira/Template - análise de produção.xlsm",
+    "aba": "Orçamento",
+    "colunas": ["BTG", "FCST", "Tipo"],
+    "mapeamento": {
+        "BTG": "Buget",
+        "FCST": "Forecast",
+        "Tipo": "cod_tipom"
+    },
+    "chave": [],
+    "pk_column": "cod_orcamento",
+    "pk_expression": "nextval('sqorcamento')",
+    "tabela_bd": "Orcamento",
+    "checkpoint": null,
+    "fk": { "cod_date": "data" },        
+    "usar_ultimo_id_data": false,
+    "apenas_ultimo": true,
+    "coluna_ordenacao": null 
+  }    
+
+]
