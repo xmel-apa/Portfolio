@@ -11,17 +11,17 @@ CATEGORIAS = {
     "MP - PVC/PE": {
         "base": "PVC OR PE OR polietileno OR resina plástica",
         "mercado": ["preço", "mercado", "cotação", "demanda", "petroquímica"],
-        "domains": "globo.com, reuters.com, valor.com.br, exame.com, infomoney.com.br"
+        "domains": "globo.com,estadao.com.br,folha.uol.com.br,plasticomoderno.com.br,plasticoindustrial.com.br,plastshow.com.br,abiplast.org.br,petroquimica.com.br,plasticsnews.com,plasticsnewseurope.com,pvc.org,icis.com,chemorbis.com,spglobal.com"
     },
     "MP - Óleo de soja": {
         "base": "soja OR soybean oil OR farelo soja",
         "mercado": ["preço", "cotação", "mercado", "Chicago", "CBOT"],
-        "domains": "globo.com, reuters.com, valor.com.br, exame.com, bloomberg.com"
+        "domains": "globo.com,estadao.com.br,folha.uol.com.br,canalrural.com.br,noticiasagricolas.com.br,revistagloborural.globo.com,agenciabrasil.ebc.com.br,embrapa.br,cepea.esalq.usp.br,reuters.com,bloomberg.com/markets/commodities,farmfutures.com,dtnpf.com,agriculture.com,www.oilworld.biz"
     },
     "Global - Mercado global": {
         "base": "mercado global OR economia mundial OR commodities OR inflação OR juros",
         "mercado": ["preço", "bolsa", "índice", "dólar", "taxa"],
-        "domains": "globo.com, reuters.com, bloomberg.com, valor.com.br, exame.com"
+        "domains": "globo.com,estadao.com.br,folha.uol.com.br,cnnbrasil.com.br/business,terra.com.br/economia,agenciabrasil.ebc.com.br/economia,einvestidor.estadao.com.br,reuters.com,www.cnbc.com,marketwatch.com,investing.com,bloomberg.com,imf.org/en/Blogs"
     }
 }
 
@@ -31,7 +31,6 @@ def obter_noticias(categoria_nome: str) -> List[Dict[str, str]]:
     termos_mercado = " OR ".join(info["mercado"])
     query = f"({termos_base}) ({termos_mercado})"
 
-    # Primeiro tenta com domínios
     parametros = {
         "q": query,
         "apiKey": NEWSAPI_KEY,
@@ -46,28 +45,13 @@ def obter_noticias(categoria_nome: str) -> List[Dict[str, str]]:
         resp = requests.get(NEWSAPI_URL, params=parametros, headers=headers, timeout=10)
         resp.raise_for_status()
         dados = resp.json()
-
-        if dados["status"] == "ok" and dados.get("articles"):
-            artigos = dados["articles"]
-        else:
-            # Fallback: sem restrição de domínios
-            fallback_params = {
-                "q": query,
-                "apiKey": NEWSAPI_KEY,
-                "language": "pt",
-                "sortBy": "publishedAt",
-                "pageSize": 20
-            }
-            resp2 = requests.get(NEWSAPI_URL, params=fallback_params, headers=headers, timeout=10)
-            resp2.raise_for_status()
-            dados2 = resp2.json()
-            artigos = dados2.get("articles", [])
+        artigos = dados.get("articles", [])
 
         resultado = []
         for artigo in artigos:
             titulo = artigo.get("title")
             link = artigo.get("url")
-            if titulo and link:
+            if titulo and link and "valor.globo.com" not in link:   # <-- filtro aqui
                 resultado.append({"titulo": titulo, "link": link})
         return resultado
 
