@@ -1,12 +1,25 @@
+# ------------------------------------------------------#
+# Data de criação: 2024-06-20
+# Autor: Pamela Almeida
+# email: pamela.almeidasp@gmail.com
+# GitHub: xmel-apa
+# linkedin: pamela-almeida-7b6695320
+# -------------------------------------------------------#
+
+
+# --- Programa de Filtro de Notícias por Categoria ---
+
 import tkinter as tk
 from tkinter import messagebox
 import webbrowser
 import requests
 from typing import List, Dict
 
-NEWSAPI_KEY = "9cfb289f91834653a0ebd34917415c25"
+# -- Configuração da API de notícias --
+NEWSAPI_KEY = "Sua_Chave_Aqui"  # Substitua pela sua chave da NewsAPI
 NEWSAPI_URL = "https://newsapi.org/v2/everything"
 
+# -- Escolha e definição das categorias e seus termos de busca em determinadas fontes --
 CATEGORIAS = {
     "MP - PVC/PE": {
         "base": "PVC OR PE OR polietileno OR resina plástica",
@@ -25,12 +38,14 @@ CATEGORIAS = {
     }
 }
 
+# --- Função que obtem as notícias da API ---
 def obter_noticias(categoria_nome: str) -> List[Dict[str, str]]:
+    # Monta a query de busca combinando os termos base e de mercado
     info = CATEGORIAS[categoria_nome]
     termos_base = info["base"]
     termos_mercado = " OR ".join(info["mercado"])
     query = f"({termos_base}) ({termos_mercado})"
-
+    # Query que inclui os termos base e de mercado
     parametros = {
         "q": query,
         "apiKey": NEWSAPI_KEY,
@@ -40,26 +55,26 @@ def obter_noticias(categoria_nome: str) -> List[Dict[str, str]]:
         "domains": info["domains"]
     }
     headers = {"User-Agent": "NewsFilterApp/1.0"}
-
+    # Realiza a requisição à API e processa os resultados
     try:
         resp = requests.get(NEWSAPI_URL, params=parametros, headers=headers, timeout=10)
         resp.raise_for_status()
         dados = resp.json()
         artigos = dados.get("articles", [])
-
         resultado = []
+        # Filtra os artigos para garantir que tenham título e link
         for artigo in artigos:
             titulo = artigo.get("title")
             link = artigo.get("url")
-            if titulo and link and "valor.globo.com" not in link:   # <-- filtro aqui
+            if titulo and link and "valor.globo.com" not in link:   
                 resultado.append({"titulo": titulo, "link": link})
         return resultado
-
+    # Tratamento de erros de requisição e resposta
     except requests.exceptions.RequestException as e:
         print(f"Erro na requisição: {e}")
         return []
 
-# --- Interface (mesmo código dark, sem sublinhado) ---
+# --- Interface ---
 class Aplicacao:
     DARK_BG = "#1e1e1e"
     DARKER_BG = "#252525"
