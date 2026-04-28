@@ -102,6 +102,7 @@ def obter_noticias(categoria_nome: str) -> List[Dict[str, str]]:
         print(f"Erro na requisição: {e}")
         return []
 
+# --- Interface ---
 class Aplicacao:
     DARK_BG = "#1e1e1e"
     DARKER_BG = "#252525"
