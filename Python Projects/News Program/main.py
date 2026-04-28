@@ -16,25 +16,25 @@ import requests
 from typing import List, Dict
 
 # -- Configuração da API de notícias --
-NEWSAPI_KEY = "SUA_CHAVE_AQUI"  # Substitua pela sua chave real da NewsAPI
+NEWSAPI_KEY = "9cfb289f91834653a0ebd34917415c25"
 NEWSAPI_URL = "https://newsapi.org/v2/everything"
 
 # -- Escolha e definição das categorias e seus termos de busca em determinadas fontes --
 CATEGORIAS = {
     "MP - PVC/PE": {
-        "base": '+"PVC" +"PE" OR +"polietileno" OR +"resina plástica"',
-        "mercado": ["preço", "mercado", "cotação", "demanda", "petroquímica"],
+        "base": '("PVC" OR "PE" OR "polietileno" OR "plastic resin" OR "polychloride" OR "polyethylene")',
+        "mercado": ["price", "market", "quotation", "demand", "petrochemical", "supply", "production", "consumption", "import", "export"],
         "domains": "globo.com,estadao.com.br,folha.uol.com.br,plasticomoderno.com.br,plasticoindustrial.com.br,plastshow.com.br,abiplast.org.br,petroquimica.com.br,plasticsnews.com,plasticsnewseurope.com,pvc.org,icis.com,chemorbis.com,spglobal.com"
     },
     "MP - Óleo de soja": {
-        "base": '+"soja" OR +"soybean oil" OR +"farelo soja" OR +"Chicago" +"CBOT"',
-        "mercado": ["preço", "cotação", "mercado", "Chicago", "CBOT"],
-        "domains": "globo.com,estadao.com.br,folha.uol.com.br,canalrural.com.br,noticiasagricolas.com.br,revistagloborural.globo.com,agenciabrasil.ebc.com.br,embrapa.br,cepea.esalq.usp.br,reuters.com,bloomberg.com/markets/commodities,farmfutures.com,dtnpf.com,agriculture.com,www.oilworld.biz"
+        "base": '("soybean" OR "soybean oil" OR "soy meal" OR "CBOT" OR "Chicago Board of Trade" OR "soja" OR "óleo de soja" OR "farelo de soja")',
+        "mercado": ["price", "quotation", "market", "demand", "export", "harvest", "production", "consumption", "import", "weather", "crop", "CBOT"],
+        "domains": "globo.com,estadao.com.br,folha.uol.com.br,canalrural.com.br,noticiasagricolas.com.br,revistagloborural.globo.com,agenciabrasil.ebc.com.br,embrapa.br,cepea.esalq.usp.br,reuters.com,bloomberg.com,farmfutures.com,dtnpf.com,agriculture.com,www.oilworld.biz"
     },
     "Global - Mercado global": {
-        "base": '+"mercado global" OR +"economia mundial" OR +"commodities" OR +"inflação" OR +"juros"',
-        "mercado": ["preço", "bolsa", "índice", "dólar", "taxa"],
-        "domains": "globo.com,estadao.com.br,folha.uol.com.br,cnnbrasil.com.br/business,terra.com.br/economia,agenciabrasil.ebc.com.br/economia,einvestidor.estadao.com.br,reuters.com,www.cnbc.com,marketwatch.com,investing.com,bloomberg.com,imf.org/en/Blogs"
+        "base": '("global market" OR "world economy" OR "commodities" OR "inflation" OR "trade war" OR "Trump" OR "interest rate")',
+        "mercado": ["price", "stock", "index", "dollar", "commodity", "oil", "gold", "currency", "exchange rate", "tariff", "trade", "economy", "growth", "recession"],
+        "domains": "globo.com,estadao.com.br,folha.uol.com.br,cnnbrasil.com.br,thedailybeast.com,terra.com.br,agenciabrasil.ebc.com.br,einvestidor.estadao.com.br,reuters.com,cnbc.com,marketwatch.com,investing.com,bloomberg.com,imf.org,newyorktimes.com,ft.com,wsj.com,bbc.com,worldometers.info"
     }
 }
 
@@ -49,7 +49,7 @@ def obter_noticias(categoria_nome: str) -> List[Dict[str, str]]:
     parametros = {
         "q": query,
         "apiKey": NEWSAPI_KEY,
-        "language": "pt",
+        #"language": "en",
         "sortBy": "publishedAt",
         "pageSize": 20,
         "domains": info["domains"]
