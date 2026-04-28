@@ -11,29 +11,34 @@ from tkinter import messagebox
 import webbrowser
 import requests
 import threading
+import urllib.parse
 from typing import List, Dict
 from summarizer import resumir
-from bs4 import BeautifulSoup   # <<--- NOVA DEPENDÊNCIA
+from bs4 import BeautifulSoup
+from sentimentAnalizer import analisar_sentimento
 
 # -- Configuração da API de notícias --
-NEWSAPI_KEY = "SUA_CHAVE_AQUI"  # Substitua pela sua chave real da NewsAPI
+NEWSAPI_KEY = "9cfb289f91834653a0ebd34917415c25"
 NEWSAPI_URL = "https://newsapi.org/v2/everything"
 
 CATEGORIAS = {
     "MP - PVC/PE": {
-        "base": '+"PVC" +"PE" OR +"polietileno" OR +"resina plástica"',
-        "mercado": ["preço", "mercado", "cotação", "demanda", "petroquímica"],
-        "domains": "globo.com,estadao.com.br,folha.uol.com.br,plasticomoderno.com.br,plasticoindustrial.com.br,plastshow.com.br,abiplast.org.br,petroquimica.com.br,plasticsnews.com,plasticsnewseurope.com,pvc.org,icis.com,chemorbis.com,spglobal.com"
+        "base": '("PVC" OR "PE" OR "polietileno" OR "plastic resin" OR "polychloride" OR "polyethylene")',
+        "mercado": ["price", "market", "quotation", "demand", "petrochemical", "supply",
+                    "production", "consumption", "import", "export"],
+        "domains": "icis.com,globo.com,estadao.com.br,folha.uol.com.br,plasticomoderno.com.br,plasticoindustrial.com.br,plastshow.com.br,abiplast.org.br,petroquimica.com.br,plasticsnews.com,plasticsnewseurope.com,pvc.org,icis.com,chemorbis.com,spglobal.com"
     },
     "MP - Óleo de soja": {
-        "base": '+"soja" OR +"soybean oil" OR +"farelo soja" OR +"Chicago" +"CBOT"',
-        "mercado": ["preço", "cotação", "mercado", "Chicago", "CBOT"],
-        "domains": "globo.com,estadao.com.br,folha.uol.com.br,canalrural.com.br,noticiasagricolas.com.br,revistagloborural.globo.com,agenciabrasil.ebc.com.br,embrapa.br,cepea.esalq.usp.br,reuters.com,bloomberg.com/markets/commodities,farmfutures.com,dtnpf.com,agriculture.com,www.oilworld.biz"
+        "base": '("soybean" OR "soybean oil" OR "soy meal" OR "CBOT" OR "Chicago Board of Trade" OR "soja" OR "óleo de soja" OR "farelo de soja")',
+        "mercado": ["price", "quotation", "market", "demand", "export", "harvest", "production",
+                    "consumption", "import", "weather", "crop", "CBOT"],
+        "domains": "icis.com,globo.com,estadao.com.br,folha.uol.com.br,canalrural.com.br,noticiasagricolas.com.br,revistagloborural.globo.com,agenciabrasil.ebc.com.br,embrapa.br,cepea.esalq.usp.br,reuters.com,bloomberg.com,farmfutures.com,dtnpf.com,agriculture.com,www.oilworld.biz"
     },
     "Global - Mercado global": {
-        "base": '+"mercado global" OR +"economia mundial" OR +"commodities" OR +"inflação" OR +"juros"',
-        "mercado": ["preço", "bolsa", "índice", "dólar", "taxa"],
-        "domains": "globo.com,estadao.com.br,folha.uol.com.br,cnnbrasil.com.br/business,terra.com.br/economia,agenciabrasil.ebc.com.br/economia,einvestidor.estadao.com.br,reuters.com,www.cnbc.com,marketwatch.com,investing.com,bloomberg.com,imf.org/en/Blogs"
+        "base": '("global market" OR "world economy" OR "commodities" OR "inflation" OR "trade war" OR "Trump" OR "interest rate")',
+        "mercado": ["price", "stock", "index", "dollar", "commodity", "oil", "gold", "currency",
+                    "exchange rate", "tariff", "trade", "economy", "growth", "recession"],
+        "domains": "icis.com,globo.com,estadao.com.br,folha.uol.com.br,cnnbrasil.com.br,thedailybeast.com,terra.com.br,agenciabrasil.ebc.com.br,einvestidor.estadao.com.br,reuters.com,cnbc.com,marketwatch.com,investing.com,bloomberg.com,imf.org,newyorktimes.com,ft.com,wsj.com,bbc.com,worldometers.info"
     }
 }
 
@@ -48,22 +53,19 @@ def extrair_texto_noticia(url: str) -> str:
         resp = requests.get(url, headers=headers, timeout=10)
         resp.raise_for_status()
         soup = BeautifulSoup(resp.content, "lxml")
-        
-        # Estratégia: procura por tags <article> ou <div> com classes comuns de conteúdo
+
         artigo = soup.find("article")
         if not artigo:
-            # Fallback: pega todos os parágrafos do corpo
             paragrafos = soup.find_all("p")
         else:
             paragrafos = artigo.find_all("p")
-        
-        # Junta os parágrafos com pelo menos 40 caracteres (evita lixo)
+
         texto = " ".join(p.get_text(strip=True) for p in paragrafos if len(p.get_text(strip=True)) > 40)
         return texto if texto else ""
     except Exception:
         return ""
 
-# --- Função que obtém as notícias da API (modificada para incluir 'texto_completo') ---
+# --- Função que obtém as notícias da API ---
 def obter_noticias(categoria_nome: str) -> List[Dict[str, str]]:
     info = CATEGORIAS[categoria_nome]
     termos_base = info["base"]
@@ -90,12 +92,14 @@ def obter_noticias(categoria_nome: str) -> List[Dict[str, str]]:
             titulo = artigo.get("title")
             link = artigo.get("url")
             descricao = artigo.get("description") or ""
+            data_iso = artigo.get("publishedAt") or ""
             if titulo and link and "valor.globo.com" not in link:
                 resultado.append({
                     "titulo": titulo,
                     "link": link,
                     "descricao": descricao,
-                    "texto_completo": ""   # será preenchido depois, ou mantido vazio
+                    "data": data_iso,
+                    "texto_completo": ""
                 })
         return resultado
     except requests.exceptions.RequestException as e:
@@ -110,18 +114,21 @@ class Aplicacao:
     LINK_COLOR = "#4da6ff"
     VISITED_COLOR = "#666666"
     GREEN_BUTTON_BG = "#2e7d32"
+    BLUE_BUTTON_BG = "#1565c0"
     RADIO_BG = "#2d2d2d"
     TEXT_AREA_BG = "#2d2d2d"
 
     def __init__(self, root):
         self.root = root
-        self.root.title("Filtro de Notícias por Categoria")
+        self.root.title("News Summarizer App")
         self.root.geometry("700x550")
         self.root.resizable(True, True)
         self.root.configure(bg=self.DARK_BG)
 
-        self.posicoes_resumos = []
+        # Armazena informações dos blocos: idx -> (inicio_index_str, link, numero, data_formatada, titulo)
+        self.marcas_resumo = {}
 
+        # --- Frame de seleção ---
         frame_selecao = tk.Frame(root, bg=self.DARK_BG, pady=10)
         frame_selecao.pack(fill="x")
 
@@ -140,15 +147,30 @@ class Aplicacao:
                 selectcolor=self.DARK_BG, relief="flat"
             ).grid(row=0, column=i, padx=10)
 
+        # --- Frame de botões (horizontal) ---
+        frame_botoes = tk.Frame(frame_selecao, bg=self.DARK_BG)
+        frame_botoes.pack(fill="x", pady=10, padx=10)
+
+        # Botão "Abrir no E‑mail" (esquerda)
         tk.Button(
-            frame_selecao, text="🔍 Buscar Notícias", font=("Arial", 11, "bold"),
+            frame_botoes, text="📬 Eniar por E-mail", font=("Arial", 11, "bold"),
+            bg=self.BLUE_BUTTON_BG, fg="white", activebackground="#0d47a1",
+            activeforeground="white", relief="flat", bd=0, padx=10, pady=3,
+            command=self.abrir_no_email_cliente
+        ).pack(side="left")
+
+        # Botão "Buscar Notícias" (direita)
+        tk.Button(
+            frame_botoes, text="🔍 Buscar Notícias", font=("Arial", 11, "bold"),
             bg=self.GREEN_BUTTON_BG, fg="white", activebackground="#1b5e20",
             activeforeground="white", relief="flat", bd=0, padx=10, pady=3,
             command=self.buscar_noticias
-        ).pack(pady=15)
+        ).pack(side="right")
 
+        # Separador
         tk.Frame(root, height=2, bg="#555555").pack(fill="x", padx=10)
 
+        # --- Frame de resultados ---
         frame_resultados = tk.Frame(root, bg=self.DARK_BG)
         frame_resultados.pack(fill="both", expand=True, padx=10, pady=10)
 
@@ -166,19 +188,19 @@ class Aplicacao:
         scrollbar.pack(side="right", fill="y")
         self.texto_resultado.pack(side="left", fill="both", expand=True)
 
+        # Configuração de tags
         self.texto_resultado.tag_configure("link", foreground=self.LINK_COLOR, underline=False)
         self.texto_resultado.tag_configure("visited", foreground=self.VISITED_COLOR, underline=False)
         self.texto_resultado.tag_configure("resumo", foreground=self.TEXT_COLOR)
-        self.texto_resultado.tag_raise("visited", "link")
 
-        # Eventos para cursor dinâmico
         self.texto_resultado.bind("<Motion>", self._on_mouse_move)
         self.texto_resultado.bind("<Leave>", self._on_mouse_leave)
 
     def _on_mouse_move(self, event):
         index = self.texto_resultado.index(f"@{event.x},{event.y}")
         tags = self.texto_resultado.tag_names(index)
-        if "link" in tags:
+        # Qualquer tag que comece com "link" (inclui as individuais)
+        if any(tag.startswith("link") for tag in tags):
             self.texto_resultado.configure(cursor="hand2")
         else:
             self.texto_resultado.configure(cursor="xterm")
@@ -192,7 +214,19 @@ class Aplicacao:
         self.texto_resultado.tag_add("visited", inicio, fim)
         self.texto_resultado.configure(state="disabled")
 
+    def formatar_data(self, data_iso):
+        if not data_iso:
+            return "Data não disponível"
+        try:
+            from datetime import datetime
+            data_iso = data_iso.replace("Z", "+00:00")
+            dt = datetime.fromisoformat(data_iso)
+            return dt.strftime("%d/%m/%Y %H:%M")
+        except:
+            return data_iso
+
     def buscar_noticias(self):
+        """Realiza a busca de notícias e inicia o processamento em background."""
         categoria = self.categoria_selecionada.get()
         self.texto_resultado.configure(state="normal")
         self.texto_resultado.delete("1.0", "end")
@@ -211,69 +245,132 @@ class Aplicacao:
             self.texto_resultado.configure(state="disabled")
             return
 
-        self.posicoes_resumos = []
+        # Limpa dados anteriores
+        self.marcas_resumo.clear()
 
         for i, n in enumerate(noticias, 1):
-            linha_titulo = f"{i}. {n['titulo']}\n"
-            inicio_titulo = self.texto_resultado.index("end-1c")
-            self.texto_resultado.insert("end", linha_titulo)
-            fim_titulo = self.texto_resultado.index("end-1c")
-            self.texto_resultado.tag_add("link", inicio_titulo, fim_titulo)
-            self.texto_resultado.tag_bind(
-                "link", "<Button-1>",
-                lambda e, url=n['link'], ini=inicio_titulo, fi=fim_titulo: self.abrir_link(url, ini, fi)
+            data_formatada = self.formatar_data(n.get('data'))
+            titulo = n['titulo']
+            link = n['link']
+
+            # Bloco placeholder
+            bloco = (
+                f"{i}. {titulo}  [{data_formatada}]\n"
+                f"   ⏳ Gerando resumo...\n\n"
             )
 
-            pos_inicio = self.texto_resultado.index("end-1c")
-            self.texto_resultado.insert("end", "   ⏳ Gerando resumo...\n\n")
-            pos_fim = self.texto_resultado.index("end-1c")
-            self.posicoes_resumos.append((pos_inicio, pos_fim))
+            inicio_index_str = self.texto_resultado.index("end-1c")
+            self.texto_resultado.insert("end", bloco)
+            fim_index_str = self.texto_resultado.index("end-1c")
+
+            # Marcas temporárias para substituição posterior
+            self.texto_resultado.mark_set(f"bloco_start_{i}", inicio_index_str)
+            self.texto_resultado.mark_set(f"bloco_end_{i}", fim_index_str)
+
+            # Armazena dados para reconstruir o bloco final
+            self.marcas_resumo[i-1] = (inicio_index_str, link, i, data_formatada, titulo)
 
         self.texto_resultado.configure(state="disabled")
         print(f"{len(noticias)} notícia(s) encontrada(s) para '{categoria}'.")
 
-        # Dispara a thread que fará o scraping e sumarização
+        # Inicia thread para resumo e sentimento
         thread = threading.Thread(target=self._processar_resumos, args=(noticias,))
         thread.daemon = True
         thread.start()
 
     def _processar_resumos(self, noticias):
-        """Em segundo plano, obtém texto completo (scraping) e resume."""
+        """Em segundo plano, extrai texto, resume e analisa sentimento."""
         for idx, noticia in enumerate(noticias):
-            # Tenta extrair o texto completo da página
             texto_completo = extrair_texto_noticia(noticia['link'])
-            
-            # Define o texto a ser resumido: texto completo se disponível e maior que a descrição
+
+            # Define o texto a ser analisado
             if texto_completo and len(texto_completo) > len(noticia.get('descricao', '')):
-                texto_para_resumo = noticia['titulo'] + ". " + texto_completo
+                texto_analise = noticia['titulo'] + ". " + texto_completo
             else:
-                texto_para_resumo = noticia['titulo']
+                texto_analise = noticia['titulo']
                 if noticia.get('descricao'):
-                    texto_para_resumo += ". " + noticia['descricao']
-            
+                    texto_analise += ". " + noticia['descricao']
+
+            # Análise de sentimento
             try:
-                resumo = resumir(texto_para_resumo[:2000])  # limita tamanho para não estourar token
+                sentimento = analisar_sentimento(texto_analise[:2000])
+            except Exception:
+                sentimento = {
+                    "classificacao": "ERRO",
+                    "emoji": "⚠️",
+                    "score_compound": 0.0,
+                    "scores": {}
+                }
+
+            # Resumo
+            try:
+                resumo = resumir(texto_analise[:2000])
             except Exception as e:
                 resumo = f"Erro ao resumir: {e}"
-            
-            # Atualiza interface
-            self.root.after(0, self._exibir_resumo, idx, resumo)
 
-    def _exibir_resumo(self, idx, resumo_texto):
+            # Atualiza a interface
+            self.root.after(0, self._exibir_resumo, idx, resumo, sentimento)
+
+    def _exibir_resumo(self, idx, resumo_texto, sentimento_info):
+        """Substitui o placeholder pelo título + sentimento + resumo, mantendo o título clicável."""
         try:
-            pos_inicio, pos_fim = self.posicoes_resumos[idx]
-        except IndexError:
+            inicio_str, link, numero, data_formatada, titulo = self.marcas_resumo[idx]
+        except KeyError:
             return
 
         self.texto_resultado.configure(state="normal")
-        self.texto_resultado.delete(pos_inicio, pos_fim)
-        self.texto_resultado.insert(pos_inicio, f"   📄 Resumo: {resumo_texto}\n\n")
-        fim_resumo = self.texto_resultado.index(f"{pos_inicio} lineend+2c")
-        self.texto_resultado.tag_add("resumo", pos_inicio, fim_resumo)
-        self.texto_resultado.tag_remove("link", pos_inicio, fim_resumo)
+
+        # Remove bloco placeholder
+        marca_start = f"bloco_start_{idx+1}"
+        marca_end = f"bloco_end_{idx+1}"
+        self.texto_resultado.delete(marca_start, marca_end)
+
+        # Novo bloco com dados processados
+        texto_final = (
+            f"{numero}. {titulo}  [{data_formatada}]\n"
+            f"   📊 Sentimento: {sentimento_info['emoji']} {sentimento_info['classificacao']} "
+            f"(Score: {sentimento_info['score_compound']:.2f})\n"
+            f"   📄 Resumo: {resumo_texto}\n\n"
+        )
+
+        self.texto_resultado.insert(inicio_str, texto_final)
+
+        # Torna o título clicável
+        fim_titulo = self.texto_resultado.index(f"{inicio_str} lineend")
+        tag_link = f"link_noticia_{idx}"
+        self.texto_resultado.tag_configure(tag_link, foreground=self.LINK_COLOR, underline=False)
+        self.texto_resultado.tag_add(tag_link, inicio_str, fim_titulo)
+        self.texto_resultado.tag_bind(
+            tag_link,
+            "<Button-1>",
+            lambda e, url=link, ini=inicio_str, fi=fim_titulo: self.abrir_link(url, ini, fi)
+        )
+
+        # Aplica tag 'resumo' às linhas de dados (opcional)
+        self.texto_resultado.tag_add("resumo", f"{inicio_str} + 1 line", f"{inicio_str} + 3 lines")
+
         self.texto_resultado.configure(state="disabled")
+
+    def abrir_no_email_cliente(self):
+        """Abre o cliente de e-mail padrão com os resumos prontos para envio."""
+        conteudo = self.texto_resultado.get("1.0", "end-1c")
+        if not conteudo.strip() or "Buscando notícias..." in conteudo:
+            messagebox.showwarning("Sem conteúdo", "Execute uma busca antes de abrir o e-mail.")
+            return
+
+        categoria = self.categoria_selecionada.get()
+        assunto = f"Resumos de Notícias - {categoria}"
+
+        # Cria a URL mailto: com assunto e corpo
+        mailto_url = (
+            f"mailto:?"
+            f"subject={urllib.parse.quote(assunto)}"
+            f"&body={urllib.parse.quote(conteudo)}"
+        )
+        webbrowser.open(mailto_url)
 
 if __name__ == "__main__":
     root = tk.Tk()
+    root.iconbitmap("app_icon.ico")
     app = Aplicacao(root)
     root.mainloop()

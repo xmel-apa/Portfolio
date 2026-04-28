@@ -15,12 +15,12 @@ def resumir(texto, max_length=150, min_length=30):
     texto = re.sub(r'\s+', ' ', texto).strip()
 
     # Tokenização
-    inputs = tokenizer(texto, return_tensors="pt", max_length=512, truncation=True)
+    inputs = tokenizer(texto, return_tensors="pt", max_length=1000, truncation=True)
 
     # Geração do resumo
     summary_ids = modelo.generate(
         inputs["input_ids"],
-        max_length=300,
+        max_length=800,
         min_length=80,
         length_penalty=4.0,      # Personaliza resumos mais curtos
         num_beams=4,             # Número de sequências a serem considerados
