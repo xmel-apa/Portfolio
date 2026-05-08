@@ -163,7 +163,7 @@ class Aplicacao:
 
         # Botão "Abrir no E‑mail" (esquerda)
         tk.Button(
-            frame_botoes, text="📬 Eniar por E-mail", font=("Arial", 11, "bold"),
+            frame_botoes, text="📬 Enviar por E-mail", font=("Arial", 11, "bold"),
             bg=self.BLUE_BUTTON_BG, fg="white", activebackground="#0d47a1",
             activeforeground="white", relief="flat", bd=0, padx=10, pady=3,
             command=self.abrir_no_email_cliente
