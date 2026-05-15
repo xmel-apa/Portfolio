@@ -1,8 +1,21 @@
+# ------------------------------------------------------#
+# Data de criação: 2026-05-11
+# Autor: Pamela Almeida
+# email: pamela.almeidasp@gmail.com
+# GitHub: xmel-apa
+# linkedin: pamela-almeida-7b6695320
+# -------------------------------------------------------#
+
 import logging
 import os
+from dotenv import load_dotenv
+load_dotenv()
 from flask import Flask, request, jsonify
 from cnpjVerification import validar_cnpj
 from sapConnector import criar_fornecedor_odata
+from aiAssistant import analisar_cadastro
+
+#-- Raiz do projeto
 
 # Configurações de logg
 logging.basicConfig(
@@ -11,6 +24,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Chamada do Flask para roteamento
 app = Flask(__name__)
 
 _CAMPOS_OBRIGATORIOS = [
@@ -71,6 +85,23 @@ def cadastrar():
 
     logger.info(f"CNPJ {cnpj} aprovado | Situação: {validacao.get('situacao')}")
 
+    # Análise de IA: valida consistência dos dados antes de enviar ao SAP
+    analise = analisar_cadastro(dados, dados_receita=validacao)
+    if analise['erros']:
+        logger.warning(f"IA bloqueou cadastro | CNPJ: {cnpj} | Erros: {analise['erros']}")
+        return jsonify({
+            'status': 'erro',
+            'mensagem': 'Dados recusados pela análise de IA',
+            'erros': analise['erros'],
+            'alertas': analise.get('alertas', []),
+        }), 400
+    if analise['alertas']:
+        logger.info(f"IA aprovou com alertas | CNPJ: {cnpj} | Alertas: {analise['alertas']}")
+
+    # Enriquece o endereço com a interpretação da IA quando disponível
+    if analise.get('endereco_normalizado'):
+        dados['_endereco_ia'] = analise['endereco_normalizado']
+
     # Cadastrando os fornecedores
     resultado = criar_fornecedor_odata(dados)
     if 'erro' in resultado:
@@ -87,12 +118,12 @@ def cadastrar():
         'cnpj': cnpj,
     }), 201
 
-
+# Verificação de saude da aplicação Flask
 @app.route('/health', methods=['GET'])
 def health():
     return jsonify({'status': 'ok'}), 200
 
-
+# Inicialização do Server
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=False)

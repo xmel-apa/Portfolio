@@ -1,13 +1,24 @@
+# ------------------------------------------------------#
+# Data de criação: 2026-05-11
+# Autor: Pamela Almeida
+# email: pamela.almeidasp@gmail.com
+# GitHub: xmel-apa
+# linkedin: pamela-almeida-7b6695320
+# -------------------------------------------------------#
+
 import re
 import requests
 
+#-- Validação do CNPJ
+
+# Importação da API BrasilApi
 _BRASILAPI_URL = "https://brasilapi.com.br/api/cnpj/v1/{}"
 
 # Limpeza de formatação do dado
 def _limpar(cnpj: str) -> str:
     return re.sub(r'\D', '', cnpj or '')
 
-# Verificação dos dados no padrão
+# Verificação dos dados (Ajustar dependendo da entrada)
 def _formato_valido(cnpj: str) -> bool:
     if len(cnpj) != 14 or cnpj == cnpj[0] * 14:
         return False
@@ -27,11 +38,12 @@ def validar_cnpj(cnpj: str) -> dict:
     Validates CNPJ format and checks active status on Receita Federal via BrasilAPI.
     Returns dict with 'valido' (bool) and 'situacao'/'motivo' (str).
     """
+    # Chamada de Função
     cnpj_limpo = _limpar(cnpj)
-
+    # Chamada de Função
     if not _formato_valido(cnpj_limpo):
         return {'valido': False, 'motivo': 'Dígitos verificadores inválidos'}
-
+    # CallBacks
     try:
         resp = requests.get(_BRASILAPI_URL.format(cnpj_limpo), timeout=15)
     except requests.Timeout:
