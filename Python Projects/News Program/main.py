@@ -16,7 +16,7 @@ import requests
 from typing import List, Dict
 
 # -- Configuração da API de notícias --
-NEWSAPI_KEY = "9cfb289f91834653a0ebd34917415c25"
+NEWSAPI_KEY = ""
 NEWSAPI_URL = "https://newsapi.org/v2/everything"
 
 # -- Escolha e definição das categorias e seus termos de busca em determinadas fontes --
