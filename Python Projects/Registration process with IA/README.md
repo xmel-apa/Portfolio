@@ -10,6 +10,7 @@ ESCOPO DO PROJETO
   OBS: O projeto pode ser utilizado e modificado por qualquer pessoa interessada. 
   Ultima versão: 15 de Maio, 2026
 
+by EU
 
 PROJECT SCOPE
 
@@ -22,6 +23,8 @@ TOOLS and LIBRARIES: flask, requests, anthropic, python-dotenv, BrasilAPI, API V
 
 NOTE: The project can be used and modified by anyone interested.
 Last version: May 15, 2026
+
+By ME
 
 # ------------------------------------------------------#
 # Data de criação: 2026-05-11
