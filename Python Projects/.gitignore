@@ -4,3 +4,7 @@
 *.pyz
 build/
 dist/
+.env
+*.log
+__pycache__/
+*.pyc
